@@ -588,24 +588,34 @@ function buildSidebar(data) {
   `;
 }
 
-async function init() {
-  const data = DATA;
-  window.__data = data;
+function init() {
+  try {
+    // Инициализация Telegram Mini App
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
 
-  document.getElementById('header-meta').textContent =
-    `${data.period.start} — ${data.period.end} · ${data.participants.length} участников`;
+    const data = DATA;
+    window.__data = data;
 
-  buildSidebar(data);
-  showView('overview', data);
+    document.getElementById('header-meta').textContent =
+      `${data.period.start} — ${data.period.end} · ${data.participants.length} участников`;
 
-  let timer;
-  document.getElementById('search').addEventListener('input', e => {
-    clearTimeout(timer);
-    timer = setTimeout(() => doSearch(e.target.value, data), 200);
-  });
+    buildSidebar(data);
+    showView('overview', data);
+
+    let timer;
+    document.getElementById('search').addEventListener('input', e => {
+      clearTimeout(timer);
+      timer = setTimeout(() => doSearch(e.target.value, data), 200);
+    });
+  } catch(e) {
+    document.body.innerHTML = `<div style="padding:24px;color:#ff6b6b;font-family:monospace">Error: ${e.message}<br><pre>${e.stack}</pre></div>`;
+  }
 }
 
-init();
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
