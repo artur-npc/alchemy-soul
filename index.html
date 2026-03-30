@@ -102,9 +102,49 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe 
 /* PRACTICES */
 .practice-item{margin:0 16px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 12px 12px 32px;font-size:.85rem;line-height:1.5;position:relative}
 .practice-item::before{content:'✦';position:absolute;left:11px;top:12px;color:var(--accent);font-size:.8rem}
+
+/* LOCK SCREEN */
+#lock-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.lock-title{font-size:1.6rem;font-weight:700;background:linear-gradient(90deg,#a78bfa,#4ecdc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lock-sub{font-size:.85rem;color:var(--text2)}
+.pin-dots{display:flex;gap:16px}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:var(--border);transition:background .15s}
+.pin-dot.filled{background:var(--accent)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px}
+.pin-btn{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;font-size:1.3rem;font-weight:600;color:var(--text);cursor:pointer;text-align:center;transition:background .1s,transform .1s;-webkit-user-select:none}
+.pin-btn:active{background:var(--bg3);transform:scale(.93)}
+.pin-error{color:#ff6b6b;font-size:.85rem;opacity:0;transition:opacity .2s}
+.pin-error.show{opacity:1}
 </style>
 </head>
 <body>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-title">✨ Алхимия Души</div>
+  <div class="lock-sub">Введите PIN-код</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-error" id="pin-error">Неверный код</div>
+  <div class="pin-pad">
+    <div class="pin-btn" onclick="pinPress('1')">1</div>
+    <div class="pin-btn" onclick="pinPress('2')">2</div>
+    <div class="pin-btn" onclick="pinPress('3')">3</div>
+    <div class="pin-btn" onclick="pinPress('4')">4</div>
+    <div class="pin-btn" onclick="pinPress('5')">5</div>
+    <div class="pin-btn" onclick="pinPress('6')">6</div>
+    <div class="pin-btn" onclick="pinPress('7')">7</div>
+    <div class="pin-btn" onclick="pinPress('8')">8</div>
+    <div class="pin-btn" onclick="pinPress('9')">9</div>
+    <div class="pin-btn" style="opacity:0;pointer-events:none"></div>
+    <div class="pin-btn" onclick="pinPress('0')">0</div>
+    <div class="pin-btn" onclick="pinDel()">⌫</div>
+  </div>
+</div>
 
 <!-- HOME SCREEN -->
 <div class="screen active" id="screen-home">
@@ -341,6 +381,35 @@ function renderMsg(m, q) {
     '</div>'+
     '<div class="msg-text">'+hl(m.text, q||'')+'</div>'+
   '</div>';
+}
+
+// --- PIN ---
+const CORRECT = '4815';
+let pinVal = '';
+
+function pinPress(d) {
+  if (pinVal.length >= 4) return;
+  pinVal += d;
+  document.getElementById('d'+(pinVal.length-1)).classList.add('filled');
+  if (pinVal.length === 4) setTimeout(checkPin, 150);
+}
+function pinDel() {
+  if (!pinVal.length) return;
+  document.getElementById('d'+(pinVal.length-1)).classList.remove('filled');
+  pinVal = pinVal.slice(0,-1);
+  document.getElementById('pin-error').classList.remove('show');
+}
+function checkPin() {
+  if (pinVal === CORRECT) {
+    const lock = document.getElementById('lock-screen');
+    lock.style.transition = 'opacity .3s';
+    lock.style.opacity = '0';
+    setTimeout(() => lock.remove(), 300);
+  } else {
+    document.getElementById('pin-error').classList.add('show');
+    [0,1,2,3].forEach(i => document.getElementById('d'+i).classList.remove('filled'));
+    pinVal = '';
+  }
 }
 
 // --- INIT ---
